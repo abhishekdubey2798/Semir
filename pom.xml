@@ -40,16 +40,16 @@
 						<applicationName>${applicationName}</applicationName>
 						<environment>${environment}</environment>
 						<businessGroup>${businessGroup}</businessGroup>
-						<region>${region}</region>
+						<!-- <region>${region}</region> -->
 						<workers>${workers}</workers>
 						<workerType>${workerType}</workerType>
 						<objectStoreV2>true</objectStoreV2>
-						<properties>
+						<!-- <properties>
 							<anypoint.platform.client_id>${client_id}</anypoint.platform.client_id>
 							<anypoint.platform.client_secret>${client_secret}</anypoint.platform.client_secret>
 							<anypoint.platform.config.analytics.agent.enabled>true</anypoint.platform.config.analytics.agent.enabled>
 							<env>${env}</env>
-						</properties>
+						</properties> -->
 				</cloudHubDeployment>
                 </configuration>
 			</plugin>
