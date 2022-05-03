@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	<http:listener-config name="semir-s-api-httpListenerConfig">
+        <http:listener-connection host="${https.host}" port="${https.private.port}" protocol="HTTPS">
+			<tls:context >
+				<tls:key-store type="jks" path="keystore.jks" alias="mule" keyPassword="password" password="password" />
+			</tls:context>
+		</http:listener-connection>
+    </http:listener-config>
+    <apikit:config name="semir-s-api-config" api="semir-s-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="a68da0db-18ec-44c9-a655-3d51ec0748f5" >
+		<http:request-connection host="${semir.host}" protocol="HTTPS">
+			<tls:context >
+				<tls:trust-store path="${ts.path}" password="password" type="jks"/>
+			</tls:context>
+		</http:request-connection>
+	</http:request-config>
+	<api-gateway:autodiscovery apiId="${api.id}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="85ed4aeb-c93d-4d1f-ab22-4e92fb9fb25f" flowRef="semir-s-api-main" />
+	<configuration-properties doc:name="Configuration properties" doc:id="b97830ae-8b67-4f32-9794-90eb49b1ea80" file="config/${env}-properties.yaml" doc:description="production configuration properties"/>
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="4fe92ea7-74e4-4605-b93f-75dcb6874a34" file="config/${env}-properties.yaml" key="${key}" doc:description="production secure properties"/>
+	<global-property doc:name="Global Property" doc:id="d411088c-0c37-4a4e-8edb-fe3347d0054e" name="key" value="1234567891234567" doc:description="secure property key"/>
+
+</mule>

@@ -1,0 +1,53 @@
+#%RAML 1.0
+title: semir-s-api
+description: this system api will proxy the semir rest api with 3 endpoints.
+baseUri: 
+mediaType: application/json
+version: v1
+protocols:
+  - HTTPS
+traits:
+  security: !include traits/security.raml
+  errorhandler: !include traits/errorhandler.raml
+types:
+  semir-datatypes: !include traits/semir_dataType.raml
+  close-datatypes: !include traits/close_datatype.raml
+
+/qc-wts:
+  /update-qc-result-with-file-content:
+    post:
+      is: [security,errorhandler]
+      body:
+        application/x-www-form-urlencoded:
+          type: semir-datatypes 
+          example:
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include examples/success-response.json
+  /get-wts-data:
+    get:
+      is: [security,errorhandler]
+      queryParameters:
+        doc_no:
+          type: string
+          required: true
+      responses:
+        200: 
+          body:
+            application/json:
+              example: !include examples/get-wts-data.json
+  /close-wts:
+    post:
+      is: [security,errorhandler]
+      body:
+        application/x-www-form-urlencoded:
+          type: close-datatypes
+          example:
+            
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include examples/error-response.json

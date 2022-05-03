@@ -1,0 +1,17 @@
+#%RAML 1.0 Trait
+usage: Apply this to authenticate the client to access the API.
+headers:
+  client_id:
+    description: |
+          Security token to access api on Anypoint Platform
+    required: true
+    type: string 
+    maxLength: 50
+    example: "1234XXXXXXXX"
+  client_secret:
+    description: |
+          Security token to access api on Anypoint Platform
+    required: true
+    type: string
+    maxLength: 50
+    example: "1234XXXXXXXX"

@@ -1,0 +1,21 @@
+http:
+  port: "8082"
+  host: "0.0.0.0"
+
+https:
+  host: "0.0.0.0" 
+  private.port: "8092"
+  timeout: "120000"
+  
+semir:
+  host: "scmtest.semirapp.com"
+  getpath: "/thirdpartyapi/qc-wts/get-wts-data"
+  updatepath: "/thirdpartyapi/qc-wts/update-qc-result-with-file-content"
+  closepath: "/thirdpartyapi/qc-wts/close-wts"
+  token: "![NREHcHFgDjzmm3HUdO/ZJKjpoatC7UsQEP1NNC9/WlfgH0EOnNzUwnDjgl4gEYRp]"
+  
+ts:
+  path: "semir-truststore.jks"
+  
+api:
+  id: "16516589"

@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+    <flow name="semir-s-api-main">
+        <http:listener config-ref="semir-s-api-httpListenerConfig" path="/v1.0/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[%dw 2.0
+output application/json
+---
+{
+            "errors": {
+                "error": "error on server side",
+                "message": error.description
+            }
+}]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="semir-s-api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="semir-s-api-console">
+        <http:listener config-ref="semir-s-api-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="semir-s-api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="get:\qc-wts\get-wts-data:semir-s-api-config">
+        <logger level="INFO" doc:name="get-wts flow started" doc:id="1fb8a8ef-4e69-46dc-9a30-042f4981737f" message=" semir get-wts flow started" />
+        <set-variable value="#[attributes.queryParams.doc_no]" doc:name="Set Variable" doc:id="db52fee2-979b-4235-8cff-dd6d90ddf25b" variableName="doc_no" />
+        <logger level="INFO" doc:name="doc_no" doc:id="8495aca4-7090-42f7-9209-97febc8d8d7b" message="#[vars.doc_no]" />
+        <try doc:name="Try" doc:id="ab840cc6-48ef-4ea8-93b3-54fd58d1cf2a">
+            <logger level="INFO" doc:name="semir get request started" doc:id="3ceef396-7ad6-41a1-9f66-ab887e97a7f6" message="semir get-wts request flow started" />
+            <http:request method="GET" doc:name="Request" doc:id="b9c314c1-b076-4f92-876f-19ce7a4fd4c8" config-ref="HTTP_Request_configuration" path="${semir.getpath}" responseTimeout="${https.timeout}">
+                <http:query-params><![CDATA[#[output application/java
+---
+{
+	"doc_no" : vars."doc_no",
+	"token" : p('secure::semir.token')
+}]]]></http:query-params>
+            </http:request>
+            <logger level="INFO" doc:name="semir request ended" doc:id="cde24c06-2941-4b6e-a6a8-e84b8aa708bc" message="semir get-wts request ended successfully" />
+            <error-handler>
+                <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="4e2fbc7e-760d-4b36-8d78-293200f2ac58" type="ANY">
+                    <ee:transform doc:name="Transform Message" doc:id="06bcbe52-c6c0-493c-bdab-bd795d2f724a">
+                        <ee:message>
+                            <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	error: error.errorType.identifier,
+	message: error.description,
+	detailedDescription: error.detailedDescription
+}]]></ee:set-payload>
+                        </ee:message>
+                    </ee:transform>
+                    <logger level="INFO" doc:name="logging error responses" doc:id="3a667f6b-9b1e-4227-a02b-70fcc7568c73" message="#[payload]" />
+                </on-error-propagate>
+            </error-handler>
+        </try>
+        <ee:transform doc:name="Transform Message" doc:id="a05fcdff-dfec-4ba4-891b-55060e24d759">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <logger level="INFO" doc:name="Logger" doc:id="e1f4f187-cfb7-41f4-9cbf-b19ee3fffecc" message="semir get qc-wts request ended" />
+    </flow>
+    <flow name="post:\qc-wts\update-qc-result-with-file-content:application\x-www-form-urlencoded:semir-s-api-config">
+        <logger level="INFO" doc:name=" semir-s-api flow starts" doc:id="69084336-7afc-4415-a934-a0b150a04301" message=" semir-s-api post update-qc-result request started" />
+        <try doc:name="Try" doc:id="b27c2801-62f4-41ad-8cd2-267378499a9e">
+            <logger level="INFO" doc:name="semir request started" doc:id="e31ea0f4-ea9c-4272-87e8-15c7ba513349" message="semir update-qc-result request started" />
+            <http:request method="POST" doc:name="Request" doc:id="59a8cc41-00f0-4b4b-bdab-afa10aef80cc" config-ref="HTTP_Request_configuration" path="${semir.updatepath}" responseTimeout="${https.timeout}">
+                <http:body><![CDATA[#[%dw 2.0
+output application/x-www-form-urlencoded
+---
+payload]]]></http:body>
+                <http:query-params><![CDATA[#[output application/java
+---
+{
+	"token" : p('secure::semir.token')
+}]]]></http:query-params>
+            </http:request>
+            <logger level="INFO" doc:name="semir request completed successfully" doc:id="1ba82b92-4115-4311-8c3c-801e0de69f74" message="semir request completed successfully" />
+            <error-handler>
+                <on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="9ad527c5-3a47-4723-883b-ae3a38235fda" type="ANY">
+                    <ee:transform doc:name="Transform Message" doc:id="cf06cad6-a306-47ed-b149-6f525ed668be">
+                        <ee:message>
+                            <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	error: error.errorType.identifier,
+	message: error.description,
+	detailedDescription: error.detailedDescription
+}]]></ee:set-payload>
+                        </ee:message>
+                    </ee:transform>
+                    <logger level="INFO" doc:name="Logging error response" doc:id="04958a92-8cac-49d2-ab39-48be0066dd1d" message="#[payload]" />
+                </on-error-propagate>
+            </error-handler>
+        </try>
+        <ee:transform doc:name="success response" doc:id="aeaba3a2-ed1a-422c-9690-fb305afe1790">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <logger level="INFO" doc:name="semir update-qc-result ended" doc:id="20d456f2-6ddb-420b-8a38-578655037bc5" message="semir post update-qc-result request ended" />
+    </flow>
+    <flow name="post:\qc-wts\close-wts:application\x-www-form-urlencoded:semir-s-api-config">
+		<logger level="INFO" doc:name="close-wts flow started" doc:id="710df8ff-49b2-4da5-90f2-44fda56c4865" message="semir-s-api post close-wts flow started" />
+		<try doc:name="Try" doc:id="9f5aac3b-d472-41e0-a5fe-83f476f9eb65" >
+			<logger level="INFO" doc:name="semir request started" doc:id="9a5537fc-7c70-4467-8f69-6a294b1ccd9d" message="semir close-wts request started" />
+			<http:request method="POST" doc:name="Request" doc:id="5e7b0ed2-89a5-4529-aa95-a27ebed4a49f" config-ref="HTTP_Request_configuration" path="${semir.closepath}" responseTimeout="${https.timeout}">
+                <http:query-params><![CDATA[#[output application/java
+---
+{
+	"token" : p('secure::semir.token')
+}]]]></http:query-params>
+            </http:request>
+			<logger level="INFO" doc:name="semir request ended" doc:id="a7b85a9d-d0c3-4337-9e6d-a92ade6922d3" message="semir close-wts request completed successfully" />
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="80bdf0c2-efcd-44e6-8e45-dba60001acd5" type="ANY">
+					<ee:transform doc:name="Transform Message" doc:id="ab41fea9-6cf6-43f9-a387-5f96585bb6d1">
+                        <ee:message>
+                            <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	error: error.errorType.identifier,
+	message: error.description,
+	detailedDescription: error.detailedDescription
+}]]></ee:set-payload>
+                        </ee:message>
+                    </ee:transform>
+					<logger level="INFO" doc:name="logging close-wts error responses" doc:id="2b9999c9-3cb1-4215-9d08-cca0c8119c91" message="#[payload]" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<logger level="INFO" doc:name="Logger" doc:id="1a09dfd5-71af-46f7-9352-16b562969f01" message=" semir-s-api close-wts flow ended " />
+    </flow>
+</mule>

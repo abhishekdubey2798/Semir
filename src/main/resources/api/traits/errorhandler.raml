@@ -1,0 +1,53 @@
+#%RAML 1.0 Trait
+#%RAML 1.0 Trait
+description: Any error encountered within the API would result in the the following responses being generated.
+
+responses:     
+  400:
+    description: Bad Request
+    body:
+      application/json:
+        example:
+          {
+            "error": {
+              "errorCode": "",
+              "errorMessage": "Bad Request",
+              "errorDescription": "input data failed "
+            }
+          }  
+  401:
+    description: Unauthorized
+    body:
+      application/json:
+        example:
+          {
+            "error": {
+              "errorCode": "",
+              "errorMessage": "Unauthorized",
+              "errorDescription": "The request requires user authentication "
+            }
+          }     
+  405:
+    description: Method Not Allowed
+    body:
+      application/json:
+        example:
+          {
+            "error": {
+              "errorCode": "",
+              "errorMessage": "Method Not Allowed",
+              "errorDescription": "Method Not Allowed"
+            }
+          }   
+  415:
+    description: Unsupported Media Type
+    body:
+      application/json:
+        example:
+          {
+            "error": {
+              "errorCode": "",
+              "errorMessage": "Unsupported Media Type",
+              "errorDescription": "Unsupported Media Type"
+            }
+          }     
